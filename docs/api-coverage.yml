@@ -1283,17 +1283,16 @@ menus:
   /ip/firewall/filter:
     title: IPv4 firewall filter
     section: IP
-    notes: The IPv4 create_filter_rule action list includes jump but the tool has
-      no jump_target parameter; the IPv6 tool does. Action is otherwise covered. Advanced
-      matchers and action options not exposed by the tools are recorded in accepted_gaps.
+    notes: Action is covered including jump-target. Advanced matchers and action options not exposed by the tools are recorded in accepted_gaps.
     commands:
       add:
-        status: partial
+        status: implemented
         tools:
         - create_filter_rule
         params:
         - chain
         - action
+        - jump-target
         - src-address
         - dst-address
         - src-port
@@ -1335,7 +1334,6 @@ menus:
         - ingress-priority
         - ipsec-policy
         - ipv4-options
-        - jump-target
         - layer7-protocol
         - nth
         - out-bridge-port
@@ -1358,7 +1356,6 @@ menus:
         - tls-host
         - tos
         - ttl
-        notes: jump_target is missing for action="jump".
       print:
         status: implemented
         tools:
@@ -1382,6 +1379,7 @@ menus:
         params:
         - chain
         - action
+        - jump-target
         - src-address
         - dst-address
         - src-port
@@ -1422,7 +1420,6 @@ menus:
         - ingress-priority
         - ipsec-policy
         - ipv4-options
-        - jump-target
         - layer7-protocol
         - nth
         - out-bridge-port
@@ -1472,6 +1469,7 @@ menus:
         params:
         - chain
         - action
+        - jump-target
         - src-address
         - dst-address
         - src-port
@@ -1508,7 +1506,6 @@ menus:
         - ingress-priority
         - ipsec-policy
         - ipv4-options
-        - jump-target
         - layer7-protocol
         - limit
         - nth
@@ -1561,6 +1558,7 @@ menus:
         params:
         - chain
         - action
+        - jump-target
         - src-address
         - dst-address
         - src-port
@@ -1596,7 +1594,6 @@ menus:
         - ingress-priority
         - ipsec-policy
         - ipv4-options
-        - jump-target
         - layer7-protocol
         - limit
         - nth
