@@ -14,6 +14,7 @@ async def mikrotik_create_filter_rule(
     chain: Literal["input", "forward", "output"],
     action: Literal["accept", "drop", "reject", "jump", "log", "passthrough", "return", "tarpit", "fasttrack-connection"],
     jump_target: Optional[str] = None,
+    reject_with: Optional[str] = None,
     src_address: Optional[str] = None,
     dst_address: Optional[str] = None,
     src_port: Optional[str] = None,
@@ -71,6 +72,10 @@ async def mikrotik_create_filter_rule(
 
     if jump_target:
         cmd += f' jump-target="{jump_target}"'
+    if reject_with:
+        if any(c in reject_with for c in ('"', "'", '\n', '\r', ' ', '\t', ';', '$')):
+            return "Failed to create firewall filter rule: reject_with contains invalid characters."
+        cmd += f" reject-with={reject_with}"
 
     # Add optional parameters
     if src_address:
@@ -235,6 +240,7 @@ async def _update_filter_rule(
     chain: Optional[str] = None,
     action: Optional[str] = None,
     jump_target: Optional[str] = None,
+    reject_with: Optional[str] = None,
     src_address: Optional[str] = None,
     dst_address: Optional[str] = None,
     src_port: Optional[str] = None,
@@ -287,6 +293,13 @@ async def _update_filter_rule(
             if '"' in jump_target or "\n" in jump_target:
                 return "Failed to update firewall filter rule: jump_target contains invalid characters."
             updates.append(f'jump-target="{jump_target}"')
+    if reject_with is not None:
+        if reject_with == "":
+            updates.append("!reject-with")
+        else:
+            if any(c in reject_with for c in ('"', "'", '\n', '\r', ' ', '\t', ';', '$')):
+                return "Failed to update firewall filter rule: reject_with contains invalid characters."
+            updates.append(f"reject-with={reject_with}")
     if src_address is not None:
         if src_address == "":
             updates.append("!src-address")
@@ -396,6 +409,7 @@ async def mikrotik_update_filter_rule(
     chain: Optional[str] = None,
     action: Optional[str] = None,
     jump_target: Optional[str] = None,
+    reject_with: Optional[str] = None,
     src_address: Optional[str] = None,
     dst_address: Optional[str] = None,
     src_port: Optional[str] = None,
@@ -432,6 +446,7 @@ async def mikrotik_update_filter_rule(
         chain=chain,
         action=action,
         jump_target=jump_target,
+        reject_with=reject_with,
         src_address=src_address,
         dst_address=dst_address,
         src_port=src_port,

@@ -12,6 +12,7 @@ async def mikrotik_create_ipv6_filter_rule(
     chain: Literal["input", "forward", "output"],
     action: Literal["accept", "drop", "reject", "jump", "log", "passthrough", "return", "tarpit"],
     jump_target: Optional[str] = None,
+    reject_with: Optional[str] = None,
     src_address: Optional[str] = None,
     dst_address: Optional[str] = None,
     src_port: Optional[str] = None,
@@ -58,6 +59,11 @@ async def mikrotik_create_ipv6_filter_rule(
         await ctx.warning(f"Creating filter rule with no match conditions - it will match all traffic in chain '{chain}'")
 
     cmd = f"/ipv6 firewall filter add chain={chain} action={action}"
+
+    if reject_with:
+        if any(c in reject_with for c in ('"', "'", '\n', '\r', ' ', '\t', ';', '$')):
+            return "Failed to create IPv6 firewall filter rule: reject_with contains invalid characters."
+        cmd += f" reject-with={reject_with}"
 
     if jump_target:
         cmd += f' jump-target="{jump_target}"'
@@ -224,6 +230,7 @@ async def _update_ipv6_filter_rule(
     chain: Optional[str] = None,
     action: Optional[str] = None,
     jump_target: Optional[str] = None,
+    reject_with: Optional[str] = None,
     src_address: Optional[str] = None,
     dst_address: Optional[str] = None,
     src_port: Optional[str] = None,
@@ -255,6 +262,10 @@ async def _update_ipv6_filter_rule(
     """
     await ctx.info(f"Updating IPv6 firewall filter rule: rule_id={rule_id}")
 
+    if reject_with is not None and reject_with != "":
+        if any(c in reject_with for c in ('"', "'", '\n', '\r', ' ', '\t', ';', '$')):
+            return "Failed to update IPv6 firewall filter rule: reject_with contains invalid characters."
+
     # Name-bearing fields are quoted, everything else bare — the same split the
     # IPv4 scope and this scope's own `create` use.
     quoted = {
@@ -265,6 +276,7 @@ async def _update_ipv6_filter_rule(
         "dst-address-list": dst_address_list,
     }
     bare = {
+        "reject-with": reject_with,
         "src-address": src_address,
         "dst-address": dst_address,
         "src-port": src_port,
@@ -331,6 +343,7 @@ async def mikrotik_update_ipv6_filter_rule(
     chain: Optional[str] = None,
     action: Optional[str] = None,
     jump_target: Optional[str] = None,
+    reject_with: Optional[str] = None,
     src_address: Optional[str] = None,
     dst_address: Optional[str] = None,
     src_port: Optional[str] = None,
@@ -366,6 +379,7 @@ async def mikrotik_update_ipv6_filter_rule(
         chain=chain,
         action=action,
         jump_target=jump_target,
+        reject_with=reject_with,
         src_address=src_address,
         dst_address=dst_address,
         src_port=src_port,
